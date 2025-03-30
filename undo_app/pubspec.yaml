@@ -37,6 +37,7 @@ dependencies:
   cupertino_icons: ^1.0.6
   shared_preferences: ^2.2.3 # Add shared_preferences for local storage
   audioplayers: ^6.0.0 # Add audioplayers for sound effects
+  google_fonts: ^6.2.1 # Add google_fonts for custom fonts
 
 dev_dependencies:
   flutter_test:

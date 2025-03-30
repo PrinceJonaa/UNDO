@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // Import shared_preferences
-import 'input_screen.dart'; // Import the InputScreen
-import 'settings_screen.dart'; // Import the SettingsScreen
-import 'dart:async'; // Import for Timer (if needed later for refresh)
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_fonts/google_fonts.dart'; // Import google_fonts
+import 'input_screen.dart';
+import 'settings_screen.dart';
+import 'dart:async';
 
 void main() {
   runApp(const MyApp());
@@ -13,56 +14,77 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Define colors based on the brief
-    const Color offWhiteBackground = Color(0xFFFAFAFA); // Example off-white
-    const Color softIndigoPurple = Colors.deepPurple; // Placeholder, refine later
+    // Define refined colors based on the brief
+    const Color offWhiteBackground = Color(0xFFF8F8F8); // Refined off-white
+    const Color softIndigoPurple = Color(0xFF6A5ACD); // SlateBlue as soft indigo/purple
+
+    // Get the base text theme
+    final baseTextTheme = Theme.of(context).textTheme;
+    // Apply Spectral font using google_fonts
+    final spectralTextTheme = GoogleFonts.spectralTextTheme(baseTextTheme);
 
     return MaterialApp(
       title: 'UNDO', // App title
       theme: ThemeData(
+        // Apply the Spectral font theme globally
+        textTheme: spectralTextTheme,
+        primaryTextTheme: spectralTextTheme, // Apply to primary elements too
+
         colorScheme: ColorScheme.fromSeed(
           seedColor: softIndigoPurple,
           background: offWhiteBackground,
+          brightness: Brightness.light, // Ensure light theme for contrast
         ),
         scaffoldBackgroundColor: offWhiteBackground,
-        // TODO: Add Serif font (e.g., Spectral) - requires adding font file to pubspec.yaml
-        // fontFamily: 'Spectral',
-        appBarTheme: const AppBarTheme(
-          backgroundColor: offWhiteBackground, // Keep AppBar background consistent
-          foregroundColor: Colors.black87, // Adjust text/icon color for contrast
-          elevation: 0, // Minimalist: remove shadow
-          centerTitle: true, // Center the title
+
+        appBarTheme: AppBarTheme(
+          backgroundColor: offWhiteBackground,
+          foregroundColor: Colors.black87, // Keep contrast
+          elevation: 0,
+          centerTitle: true,
+          // Apply font explicitly to title (optional, theme should handle)
+          titleTextStyle: GoogleFonts.spectral(
+            textStyle: baseTextTheme.titleLarge?.copyWith(color: Colors.black87),
+            fontWeight: FontWeight.w600, // Example weight adjustment
+          ),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: softIndigoPurple, // Button background
-            foregroundColor: Colors.white, // Button text color
+            backgroundColor: softIndigoPurple,
+            foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-            textStyle: const TextStyle(
+            // Apply font explicitly to button text (optional, theme should handle)
+            textStyle: GoogleFonts.spectral(
+              textStyle: baseTextTheme.labelLarge?.copyWith(color: Colors.white),
               fontSize: 16,
-              // fontFamily: 'Spectral', // Apply font here too
+              fontWeight: FontWeight.w500,
             ),
             // Style for disabled button
-            disabledBackgroundColor: Colors.grey[300],
-            disabledForegroundColor: Colors.grey[500],
+            disabledBackgroundColor: Colors.grey[350], // Slightly adjusted grey
+            disabledForegroundColor: Colors.grey[600],
           ),
         ),
         // Define bottom sheet theme for consistent appearance
         bottomSheetTheme: const BottomSheetThemeData(
-          backgroundColor: offWhiteBackground, // Match background
-          shape: RoundedRectangleBorder( // Optional: rounded corners
+          backgroundColor: offWhiteBackground,
+          shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
           ),
         ),
+        // Apply font to general text elements if needed
+        // textTheme: spectralTextTheme.copyWith(
+        //   bodyMedium: GoogleFonts.spectral(textStyle: baseTextTheme.bodyMedium),
+        //   // Apply to other text styles as needed
+        // ),
         useMaterial3: true,
       ),
-      home: const HomeScreen(), // Set HomeScreen as the initial route
-      debugShowCheckedModeBanner: false, // Hide debug banner
+      home: const HomeScreen(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
 
-// Convert HomeScreen to StatefulWidget
+// HomeScreen StatefulWidget remains the same
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -71,7 +93,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  bool _isButtonEnabled = false; // Start as disabled until checked
+  bool _isButtonEnabled = false;
   static const String _lastSubmissionKey = 'last_submission_timestamp';
 
   @override
@@ -88,13 +110,11 @@ class _HomeScreenState extends State<HomeScreen> {
     if (lastSubmissionMillis != null) {
       final lastSubmissionTime = DateTime.fromMillisecondsSinceEpoch(lastSubmissionMillis);
       final now = DateTime.now();
-      // Check if less than 24 hours have passed
       if (now.difference(lastSubmissionTime) < const Duration(hours: 24)) {
         allowed = false;
       }
     }
 
-    // Update the state only if the widget is still mounted
     if (mounted) {
       setState(() {
         _isButtonEnabled = allowed;
@@ -102,8 +122,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  // Function to call when navigating back from ConfirmationScreen
-  // This ensures the button state is updated immediately after submission
   void _refreshButtonState() {
      _checkSubmissionTime();
   }
@@ -113,13 +131,13 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        // Title will inherit font from AppBarTheme
         title: const Text('UNDO'),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
             tooltip: 'Settings',
             onPressed: () {
-              // Show the SettingsScreen in a modal bottom sheet
               showModalBottomSheet(
                 context: context,
                 builder: (BuildContext context) {
@@ -132,19 +150,16 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Center(
         child: ElevatedButton(
-          // Disable button visually and functionally if not allowed
           onPressed: _isButtonEnabled
               ? () async {
-                  // Navigate to Input Screen
-                  // We wait for the result (popping back) to refresh the state
                   await Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const InputScreen()),
                   );
-                  // Refresh state when returning from Input/Confirmation flow
                   _refreshButtonState();
                 }
-              : null, // null onPressed disables the button
+              : null,
+          // Text will inherit font from ElevatedButtonTheme
           child: Text(
             _isButtonEnabled ? 'Release a Moment' : 'Come back tomorrow',
           ),

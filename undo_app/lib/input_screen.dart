@@ -166,6 +166,8 @@ class _InputScreenState extends State<InputScreen> with SingleTickerProviderStat
                 ),
                 keyboardType: TextInputType.text,
                 maxLines: null,
+                // Explicitly apply theme font to input style
+                style: Theme.of(context).textTheme.bodyLarge,
               ),
               const SizedBox(height: 24.0),
               ElevatedButton(
